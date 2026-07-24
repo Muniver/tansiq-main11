@@ -98,13 +98,6 @@ function keyToPath(key){
 }
 
 async function storageGet(key){
-  // Test data for development
-  if(key === 'applicant:1001'){
-    return { seat: '1001', name: 'أحمد محمد', score: 320, order: [0, 1, 2, 3] };
-  }
-  if(key === 'applicant:1002'){
-    return { seat: '1002', name: 'فاطمة علي', score: 290, order: [5, 6, 7] };
-  }
   try{
     const res = await fetch(`${FIREBASE_URL}/${keyToPath(key)}.json`);
     if(!res.ok) return null;
