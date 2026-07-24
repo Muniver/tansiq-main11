@@ -386,16 +386,20 @@ button.ghost:hover{background:rgba(124,31,43,0.04); border-color:rgba(124,31,43,
 .cert-seal-img{width:160px; height:160px; margin:0;}
 .cert-sig-line{width:140px; border-top:2px solid rgba(0,0,0,0.18); margin-bottom:6px; margin-inline:auto;}
 @media(max-width:700px){
-  .form-card{padding:14px;}
-  .certificate{padding:8px;}
-  .cert-border{padding:8px;}
-  .cert-inner{padding:14px;}
-  .cert-inner-flex{flex-direction:column; gap:12px; text-align:center;}
-  .cert-text-col{text-align:center;}
-  .cert-name{font-size:1.25rem !important;}
-  .cert-seal-col{flex-direction:row; justify-content:center; gap:14px; width:100%;}
+  .form-card{padding:12px;}
+  .certificate{padding:6px;}
+  .cert-border{padding:6px;}
+  .cert-inner{padding:12px;}
+  .cert-inner-flex{flex-direction:row; gap:10px; align-items:flex-start;}
+  .cert-text-col{text-align:right; min-width:0;}
+  .cert-text-col h3{font-size:1.05rem !important;}
+  .cert-name{font-size:1.15rem !important; margin-top:8px !important;}
+  .cert-present{font-size:0.8rem !important; margin:4px 0 !important;}
+  .cert-col{font-size:0.95rem !important;}
+  .cert-uni{font-size:0.8rem !important;}
+  .cert-seal-col{flex-direction:column; gap:6px; width:auto; flex:none;}
   .cert-seal-img{width:64px; height:64px;}
-  .cert-sig-line{width:80px; margin-inline:0;}
+  .cert-sig-line{width:64px; margin-inline:auto;}
 }
 .cert-inner::before{
   content:"";
@@ -416,9 +420,19 @@ button.ghost:hover{background:rgba(124,31,43,0.04); border-color:rgba(124,31,43,
 .cert-actions .ghost{border-color:var(--paper-line);}
 
 @media print{
-  body *{visibility:hidden}
-  #certificate, #certificate *{visibility:visible}
-  #certificate{position:fixed;left:0;top:0;right:0;margin:0 auto}
+  @page{ margin:12mm; }
+  header.site, footer.site, .section-head, .search-wrap,
+  #res-out > .form-card > h3, #res-out > .form-card > p,
+  #all-list, .cert-actions{
+    display:none !important;
+  }
+  #certificate{
+    margin:0 auto !important;
+  }
+  #certificate, #certificate *{
+    -webkit-print-color-adjust:exact !important;
+    print-color-adjust:exact !important;
+  }
 }
 
 .receipt .stamp{width:120px; height:120px; margin:0 auto 10px; animation:stampIn .7s cubic-bezier(.2,1.4,.4,1) both;}
