@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>النتيجة - بوابة تنسيق ابن الجيار</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rakkas&family=Aref+Ruqaa:wght@400;700&family=Cairo:wght@300;400;500;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="app.js?v=3" defer></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function(){
+    const input = document.getElementById('res-seat');
+    const btn = document.getElementById('res-check');
+    const out = document.getElementById('res-out');
+    function showMessage(html){ out.innerHTML = html; }
+    function renderApplicant(app){
+      const score = app.score;
+      // find recommended: first eligible from applicant's choices, else best-fit eligible college
+      let recommended = null;
+      const order = app.order || [];
+      for(const id of order){
+        const c = COLLEGES[id]; if(c && c.minScore <= score){ recommended = c; break; }
+      }
+      if(!recommended){
+        const eligibleAll = COLLEGES.filter(c=>c.minScore <= score).sort((a,b)=>b.minScore - a.minScore);
+        if(eligibleAll.length) recommended = eligibleAll[0];
+      }
+
+      const choices = (app.order||[]).map((id,idx)=>{
+        const c = COLLEGES[id];
+        const ok = c && c.minScore <= score;
+        return `<li>${idx+1}. ${c?c.name:'غير معروف'} <span class="uni">${c?c.uni:''}</span> — ${ok?'<strong class="ok">مناسب لمجموعك</strong>':'<span class="nok">أعلى من مجموعك</span>'}`;
+      }).join('');
+
+      // render recommended card and a hidden expandable list
+      const recHtml = recommended ? `
+        <div id="certificate" class="certificate">
+          <div class="cert-border">
+            <div class="cert-inner cert-inner-flex">
+              <div class="cert-text-col">
+                <h3 style="margin:0;color:var(--maroon-deep);font-family:var(--display);font-size:1.5rem;">نتيجة تنسيق الكلية</h3>
+                <h2 class="cert-name" style="margin-top:12px;margin-bottom:8px;font-size:1.6rem;">${app.name}</h2>
+                <p class="cert-present" style="margin:8px 0;color:var(--ink-soft);font-size:0.95rem;">الاسم: <strong>${app.name}</strong></p>
+                <p class="cert-present" style="margin:8px 0;color:var(--ink-soft);font-size:0.95rem;">المجموع: <strong>${app.score}</strong></p>
+                <p style="margin:12px 0 6px;color:var(--ink-soft);font-size:0.9rem;">الكلية المقترحة بناءً على مجموعك</p>
+                <h3 class="cert-col" style="margin-top:4px;margin-bottom:4px;font-size:1.1rem;">${recommended.name}</h3>
+                <p class="cert-uni" style="margin:0;font-size:0.9rem;">${recommended.uni}</p>
+              </div>
+              <div class="cert-seal-col">
+                <div class="seal cert-seal-img">
+                  <img src="photos/${recommended.id+1}.png" alt="لوجو الجامعة" style="width:100%;height:100%;object-fit:contain;padding:8px;" onerror="this.style.display='none'; this.parentElement.innerHTML='<svg width=\\'120\\' height=\\'120\\' viewBox=\\'0 0 100 100\\'><circle cx=\\'50\\' cy=\\'50\\' r=\\'46\\' fill=\\'none\\' stroke=\\'#c7952b\\' stroke-width=\\'3\\'/><text x=\\'50\\' y=\\'56\\' text-anchor=\\'middle\\' font-size=\\'20\\' fill=\\'#7c1f2b\\'>ع</text></svg>'" />
+                </div>
+                <div style="text-align:center;">
+                  <div style="margin-bottom:8px;font-family:'Aref Ruqaa',serif;font-size:16px;color:var(--maroon-deep);font-weight:bold;font-style:italic;">تامر الجيار</div>
+                  <div class="cert-sig-line"></div>
+                  <div style="font-size:0.8rem;color:var(--ink-soft);">رئيس لجنة التنسيق</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="cert-actions" style="margin-top:12px;display:flex;gap:10px;justify-content:center;">
+          <button id="print-cert" class="primary">طباعة النتيجة</button>
+          <button id="show-all" class="ghost">عرض الكليات المناسبة</button>
+          <a href="register.html" class="ghost">تعديل/تسجيل جديد</a>
+        </div>
+      ` : `<div class="form-card"><p class="loading">لا توجد كلية مناسبة لمجموعك حتى الآن.</p></div>`;
+
+      const eligibleNames = COLLEGES.filter(c=>c.minScore <= score).map(c=>`<li>${c.name} <span class="uni">${c.uni}</span> — الحد الأدنى: ${c.minScore}</li>`).join('');
+
+      showMessage(`
+        <div>
+          <div class="form-card">
+            <h3>نتيجة بحث رقم الجلوس: ${app.seat}</h3>
+            <p>الاسم: <strong>${app.name}</strong> — المجموع: <strong>${app.score}</strong></p>
+            ${recHtml}
+            <div id="all-list" style="display:none;margin-top:14px;">
+              <h4>الكليات المناسبة لمجموعك</h4>
+              <ul>${eligibleNames}</ul>
+            </div>
+            <div style="text-align:center;margin-top:12px;"><a href="register.html" class="ghost">تعديل/تسجيل جديد</a></div>
+          </div>
+        </div>
+      `);
+
+      // attach toggle
+      const btn = document.getElementById('show-all');
+      if(btn){ btn.addEventListener('click', ()=>{
+        const el = document.getElementById('all-list');
+        if(!el) return;
+        if(el.style.display === 'none'){ el.style.display = 'block'; btn.textContent = 'اخفاء القائمة'; }
+        else { el.style.display = 'none'; btn.textContent = 'عرض الكليات المناسبة'; }
+      }); }
+
+      // print certificate handler
+      const pbtn = document.getElementById('print-cert');
+      if(pbtn){ pbtn.addEventListener('click', ()=>{
+        // print only certificate
+        const navs = document.querySelectorAll('header, footer, .search-wrap, .hint');
+        navs.forEach(n=>n.style.display='none');
+        window.print();
+        setTimeout(()=>{ navs.forEach(n=>n.style.display=''); }, 500);
+      }); }
+    }
+    async function check(seat){
+      if(!seat){ showMessage('<div class="loading">ادخل رقم الجلوس أولاً.</div>'); return; }
+      showMessage('<div class="loading">جاري البحث...</div>');
+      try{
+        const r = await storageGet('applicant:'+seat);
+        const data = r ? (typeof r === 'string' ? JSON.parse(r) : r) : null;
+        if(!data){ showMessage('<div class="loading">مافيش نتيجة لرقم الجلوس ده.</div>'); return; }
+        renderApplicant(data);
+      }catch(e){ showMessage('<div class="loading">حصل خطأ أثناء البحث.</div>'); }
+    }
+    // check query param
+    const params = new URLSearchParams(location.search);
+    const q = params.get('seat');
+    if(q){ input.value = q; check(q); }
+    btn.addEventListener('click', ()=>check(input.value.trim()));
+    input.addEventListener('keydown', e=>{ if(e.key==='Enter') check(input.value.trim()); });
+
+    // print / save support: open print dialog for current result
+    document.addEventListener('click', (e)=>{
+      if(e.target && e.target.id==='print-result'){
+        window.print();
+      }
+    });
+  });
+</script>
+</head>
+<body data-page="result">
+<div class="ribbon">📜 <b>الهيئة العليا للتنسيق الجياري</b> — بوابة قبول الكليات والمعاهد العليا</div></div>
+<header class="site">
+  <div class="brand">
+    <div class="seal-mini">
+      <img src="logoel.png" alt="لوجو البوابة" style="width:100%;height:100%;object-fit:contain;">
+    </div>
+    <div>
+      <h1>بوابة تنسيق ابن الجيار</h1>
+      <span>الهيئة العليا للتنسيق الجياري</span>
+    </div>
+  </div>
+  <nav class="pages">
+    <a href="home.html" data-p="home">الرئيسية</a>
+    <a href="register.html" data-p="register">التسجيل</a>
+    <a href="colleges.html" data-p="colleges">الكليات</a>
+    <a href="stats.html" data-p="stats">الإحصائيات</a>
+    <a href="events.html" data-p="events">أهم الأحداث</a>
+  </nav>
+</header>
+<main>
+  <section class="page" id="page-result">
+    <div class="section-head">
+      <h2>النتيجة حسب رقم الجلوس</h2>
+      <p>ادخل رقم جلوسك لتظهر لك الكلية المقترحة وحالة القبول بناءً على مجموعك.</p>
+    </div>
+
+    <div class="search-wrap">
+      <div class="form-card search-card">
+        <label for="res-seat" class="lbl">رقم الجلوس</label>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <input id="res-seat" class="search-box" style="flex:1;min-width:160px;" />
+          <button id="res-check" class="primary">عرض النتيجة</button> 
+
+    <div id="res-out" class="result-container"></div>
+  </section>
+</main>
+<footer class="site">
+  <div class="footer-inner">
+    <span>© 2026 الهيئة العليا للتنسيق الجياري — موقع هزار فقط</span>
+    <span>dev by <a href="https://www.instagram.com/jo_elnasr" target="_blank" rel="noreferrer noopener"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 2C4.238 2 2 4.238 2 7v10c0 2.762 2.238 5 5 5h10c2.762 0 5-2.238 5-5V7c0-2.762-2.238-5-5-5H7zm10 1.5c.828 0 1.5.672 1.5 1.5S17.828 6.5 17 6.5 15.5 5.828 15.5 5 16.172 3.5 17 3.5zM12 7.5c2.481 0 4.5 2.019 4.5 4.5S14.481 16.5 12 16.5 7.5 14.481 7.5 12 9.519 7.5 12 7.5zm0 1.5a3 3 0 100 6 3 3 0 000-6z"/></svg>@jo_elnasr</a></span>
+  </div>
+</footer>
+</body>
+</html>

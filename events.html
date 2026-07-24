@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>أهم الأحداث - بوابة تنسيق ابن الجيار</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rakkas&family=Aref+Ruqaa:wght@400;700&family=Cairo:wght@300;400;500;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="app.js" defer></script>
+<style>
+.event-item{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:16px;margin-bottom:12px;color:rgba(242,232,208,.95);transition:all .3s ease;}
+.event-item:hover{background:rgba(255,255,255,.12);border-color:rgba(199,149,67,.3);transform:translateX(-4px);}
+.event-date{color:var(--gold);font-weight:700;font-size:.9rem;margin-bottom:6px;}
+.event-title{font-size:1rem;font-weight:600;margin:6px 0;color:#f2e8d0;}
+.event-desc{font-size:.9rem;color:rgba(242,232,208,.8);line-height:1.5;}
+</style>
+</head>
+<body data-page="events">
+<div class="ribbon">📜 <b>الهيئة العليا للتنسيق الجياري</b> — بوابة قبول الكليات والمعاهد العليا</div>
+<header class="site">
+  <div class="brand">
+    <div class="seal-mini">
+      <img src="logoel.png" alt="لوجو البوابة" style="width:100%;height:100%;object-fit:contain;">
+    </div>
+    <div>
+      <h1>بوابة تنسيق ابن الجيار</h1>
+      <span>الهيئة العليا للتنسيق الجياري</span>
+    </div>
+  </div>
+  <nav class="pages">
+    <a href="home.html" data-p="home">الرئيسية</a>
+    <a href="register.html" data-p="register">التسجيل</a>
+    <a href="colleges.html" data-p="colleges">الكليات</a>
+    <a href="stats.html" data-p="stats">الإحصائيات</a>
+    <a href="events.html" data-p="events">أهم الأحداث</a>
+  </nav>
+</header>
+<main>
+  <section id="page-events" class="page active">
+    <div class="section-head">
+      <h2>أهم الأحداث والتحديثات</h2>
+      <p>آخر الأخبار والمواعيد المهمة للتنسيق.</p>
+    </div>
+
+    <div style="max-width:1000px;margin:0 auto;border-radius:16px;overflow:hidden;box-shadow:0 12px 32px rgba(20,32,51,0.15);margin-bottom:28px;">
+      <div style="background:linear-gradient(90deg,rgba(155,31,51,0.75) 0%,rgba(155,31,51,0.65) 50%,rgba(0,0,0,0.5) 100%),url('photos/alaa.jpg') center/cover;padding:40px;position:relative;min-height:280px;display:flex;align-items:center;">
+        <div style="position:absolute;top:0;right:0;width:100%;height:100%;background:radial-gradient(ellipse at center,rgba(199,149,67,0.15),transparent);pointer-events:none;"></div>
+        <div style="flex:1;z-index:2;position:relative;">
+          <div class="event-item" style="background:none;border:none;padding:0;color:#f2e8d0;">
+            <div class="event-date" style="color:#d4af37;font-size:1.1rem;">📅 ٣٠ يوليو ٢٠٢٦</div>
+            <div class="event-title" style="font-size:1.3rem;color:#f2e8d0;margin:12px 0;">الطالبة الأولى على الثانوية العامة</div>
+            <div class="event-desc" style="color:rgba(242,232,208,0.9);font-size:1rem;line-height:1.6;">ابنة الفنان علاء زينهم الأولى على الثانوية العامة بمجموع 100٪ وحصلت على منحة جامعة تعالي بليل.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="max-width:1000px;margin:0 auto;border-radius:16px;overflow:hidden;box-shadow:0 12px 32px rgba(20,32,51,0.15);">
+      <div style="background:linear-gradient(90deg,rgba(155,31,51,0.75) 0%,rgba(155,31,51,0.65) 50%,rgba(0,0,0,0.5) 100%),url('photos/diaa.jpg') center/cover;padding:40px;position:relative;min-height:280px;display:flex;align-items:center;">
+        <div style="position:absolute;top:0;right:0;width:100%;height:100%;background:radial-gradient(ellipse at center,rgba(199,149,67,0.15),transparent);pointer-events:none;"></div>
+        <div style="flex:1;z-index:2;position:relative;">
+          <div class="event-item" style="background:none;border:none;padding:0;color:#f2e8d0;">
+            <div class="event-date" style="color:#d4af37;font-size:1.1rem;">📅 ١ أغسطس ٢٠٢٦</div>
+            <div class="event-title" style="font-size:1.3rem;color:#f2e8d0;margin:12px 0;">اعتماد نتيجة الثانوية والتنسيق</div>
+            <div class="event-desc" style="color:rgba(242,232,208,0.9);font-size:1rem;line-height:1.6;">اعتماد دكتور ضياء العوضي نتيجة الثانوية والتنسيق بنسبة نجاح 100٪.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+<footer class="site">
+  <div class="footer-inner">
+    <span>© 2026 الهيئة العليا للتنسيق الجياري — موقع هزار فقط</span>
+    <span>dev by <a href="https://www.instagram.com/jo_elnasr" target="_blank" rel="noreferrer noopener"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 2C4.238 2 2 4.238 2 7v10c0 2.762 2.238 5 5 5h10c2.762 0 5-2.238 5-5V7c0-2.762-2.238-5-5-5H7zm10 1.5c.828 0 1.5.672 1.5 1.5S17.828 6.5 17 6.5 15.5 5.828 15.5 5 16.172 3.5 17 3.5zM12 7.5c2.481 0 4.5 2.019 4.5 4.5S14.481 16.5 12 16.5 7.5 14.481 7.5 12 9.519 7.5 12 7.5zm0 1.5a3 3 0 100 6 3 3 0 000-6z"/></svg>@jo_elnasr</a></span>
+  </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>التسجيل - بوابة تنسيق ابن الجيار</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rakkas&family=Aref+Ruqaa:wght@400;700&family=Cairo:wght@300;400;500;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="app.js?v=3" defer></script>
+<script>
+  function setFieldError(id, msg) {
+    const f = document.getElementById(id);
+    if (!f) return;
+    f.classList.toggle('err', !!msg);
+    const msgEl = f.querySelector('.msg');
+    if (msgEl) msgEl.textContent = msg || '';
+  }
+
+  function handleRegisterNext() {
+    const name = document.getElementById('in-name')?.value?.trim() || '';
+    const seat = document.getElementById('in-seat')?.value?.trim() || '';
+    const scoreText = document.getElementById('in-score')?.value?.trim() || '';
+
+    setFieldError('f-name', '');
+    setFieldError('f-seat', '');
+    setFieldError('f-score', '');
+
+    if (!name) {
+      setFieldError('f-name', 'الاسم مطلوب.');
+      return;
+    }
+    if (!seat || !/^[0-9]{3,10}$/.test(seat)) {
+      setFieldError('f-seat', 'رقم جلوس غير صحيح (أرقام فقط).');
+      return;
+    }
+    const score = parseFloat(scoreText);
+    if (scoreText === '' || Number.isNaN(score) || score < 0 || score > 320) {
+      setFieldError('f-score', 'المجموع لازم يكون رقم بين 0 و 320.');
+      return;
+    }
+
+    sessionStorage.setItem('applicantDraft', JSON.stringify({ name, seat, score }));
+    sessionStorage.removeItem('rankedIds');
+    window.location.href = 'rank.html';
+  }
+
+  window.handleRegisterNext = handleRegisterNext;
+  window.goToRank = handleRegisterNext;
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const page = document.body?.dataset?.page || 'register';
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    const target = document.getElementById('page-' + page);
+    if (target) target.classList.add('active');
+  });
+</script>
+</head>
+<body data-page="register">
+<div class="ribbon">📜 <b>الهيئة العليا للتنسيق الجياري</b> — بوابة قبول الكليات والمعاهد العليا</div></div>
+<header class="site">
+  <div class="brand">
+    <div class="seal-mini">
+      <img src="logoel.png" alt="لوجو البوابة" style="width:100%;height:100%;object-fit:contain;">
+    </div>
+    <div>
+      <h1>بوابة تنسيق ابن الجيار</h1>
+      <span>الهيئة العليا للتنسيق الجياري</span>
+    </div>
+  </div>
+  <nav class="pages">
+    <a href="home.html" data-p="home">الرئيسية</a>
+    <a href="register.html" data-p="register">التسجيل</a>
+    <a href="colleges.html" data-p="colleges">الكليات</a>
+    <a href="stats.html" data-p="stats">الإحصائيات</a>
+    <a href="events.html" data-p="events">الأحداث</a>
+    <a href="events.html" data-p="events">أهم الأحداث</a>
+  </nav>
+</header>
+<main>
+  <section id="page-register" class="page">
+    <div class="register-shell">
+      <div class="register-hero">
+        <div class="register-badge">📝</div>
+        <div>
+          <h3>انزل يا متدلع</h3>
+          <p>أدخل بياناتك وابدأ اختيار رغباتك بكل ثقة.</p>
+        </div>
+      </div>
+
+      <div class="steps">
+        <div class="step-pill current"><span class="dot">١</span> بياناتك</div>
+        <div class="step-pill"><span class="dot">٢</span> ترتيب الرغبات</div>
+        <div class="step-pill"><span class="dot">٣</span> التأكيد</div>
+      </div>
+
+      <div class="section-head">
+        <h2>الخطوة الأولى: بياناتك</h2>
+        <p>أدخل بياناتك ثم انتقل إلى اختيار وترتيب رغباتك.</p>
+      </div>
+
+      <div class="form-card">
+        <div class="form-row">
+          <div class="field" id="f-name">
+            <label>الاسم رباعي</label>
+            <input type="text" id="in-name" placeholder="ادخل الاسم رباعي">
+            <div class="msg"></div>
+          </div>
+          <div class="field" id="f-seat">
+            <label>رقم الجلوس</label>
+            <input type="text" inputmode="numeric" id="in-seat" placeholder="ادخل رقم الجلوس">
+            <div class="msg"></div>
+          </div>
+          <div class="field" id="f-score">
+            <label>المجموع (من 320)</label>
+            <input type="number" min="0" max="320" step="0.5" id="in-score" placeholder="ادخل مجموعك">
+            <div class="msg"></div>
+          </div>
+        </div>
+        <div class="step1-submit">
+          <button class="primary" id="step1-btn" type="button" onclick="const name=document.getElementById('in-name').value.trim(); const seat=document.getElementById('in-seat').value.trim(); const scoreText=document.getElementById('in-score').value.trim(); const score=parseFloat(scoreText); if(!name||!seat||!/^[0-9]{3,10}$/.test(seat)||scoreText===''||Number.isNaN(score)||score<0||score>320){alert('أدخل اسمًا صحيحًا ورقم جلوس ومجموعًا صحيحًا من 0 إلى 320');}else{sessionStorage.setItem('applicantDraft', JSON.stringify({name, seat, score})); sessionStorage.removeItem('rankedIds'); window.location.href='rank.html';}">التالي: ترتيب الرغبات ⟵</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+<footer class="site">
+  <div class="footer-inner">
+    <span>© 2026 الهيئة العليا للتنسيق الجياري — موقع هزار فقط</span>
+    <span>dev by <a href="https://www.instagram.com/jo_elnasr" target="_blank" rel="noreferrer noopener"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 2C4.238 2 2 4.238 2 7v10c0 2.762 2.238 5 5 5h10c2.762 0 5-2.238 5-5V7c0-2.762-2.238-5-5-5H7zm10 1.5c.828 0 1.5.672 1.5 1.5S17.828 6.5 17 6.5 15.5 5.828 15.5 5 16.172 3.5 17 3.5zM12 7.5c2.481 0 4.5 2.019 4.5 4.5S14.481 16.5 12 16.5 7.5 14.481 7.5 12 9.519 7.5 12 7.5zm0 1.5a3 3 0 100 6 3 3 0 000-6z"/></svg>@jo_elnasr</a></span>
+  </div>
+</footer>
+</body>
+</html>
