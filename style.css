@@ -305,8 +305,9 @@ main{position:relative; z-index:2; max-width:1080px; margin:0 auto; padding:34px
 .avail-item .name{flex:1;}
 .avail-item .uni, .rank-item .uni{color:var(--ink-soft); font-size:.72rem; display:block;}
 .avail-item .plus{color:var(--green); font-weight:800; font-size:1.1rem;}
-.rank-item{cursor:grab;}
-.rank-item .handle{color:var(--gold); font-weight:900; letter-spacing:2px; cursor:grab;}
+.rank-item{cursor:default;}
+.rank-item .handle{color:var(--gold); font-weight:800; letter-spacing:0; cursor:pointer; display:inline-block; width:22px; text-align:center; font-size:1.05rem;}
+.rank-item .handle:hover{transform:translateY(-2px);}
 .rank-item .badge{
   width:24px; height:24px; border-radius:50%; background:var(--maroon); color:#f2e8d0;
   display:flex; align-items:center; justify-content:center; font-size:.72rem; font-weight:800; flex:none;

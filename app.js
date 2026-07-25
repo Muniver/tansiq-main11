@@ -1,6 +1,6 @@
 const COLLEGES = [
   { name: "كلية الحب والجواز", university: "جامعة القاهرة", minScore: 300 },
-  { name: "كلية نظام الطيبات", university: "جامعة ضياء العوضي", minScore: 297 },
+  { name: "كلية نظام الطيبات", university: "جامعة ضياء العوضي", minScore: 160 },
   { name: "كلية إدارة المصالح الحكومية", university: "جامعة الزقازيق", minScore: 294 },
   { name: "كلية حلب الأبقار", university: "جامعة الزقازيق الأهلية", minScore: 291 },
   { name: "كلية هندسة جر الكنبة من الصالة", university: "جامعة القاهرة", minScore: 288 },
@@ -85,7 +85,7 @@ const COLLEGES = [
   { name: "معهد تكنولوجيا قفل السوستة", university: "جامعة البدرشين", minScore: 57 }
 ].map((c, i) => ({ id: i, name: c.name, uni: c.university, minScore: c.minScore }));
 
-const ADMIN_PASSWORD = "تنسيق2026";
+const ADMIN_PASSWORD = "jolipa12";
 
 // ==== Firebase Realtime Database (shared storage across all devices) ====
 const FIREBASE_URL = "https://tansiq-debcf-default-rtdb.firebaseio.com";
@@ -306,7 +306,7 @@ function renderRanked(){
     list.innerHTML = ids.map((id,idx)=>{
       const c = COLLEGES[id];
       return `<div class="rank-item" data-id="${id}">
-        <span class="handle">⋮⋮</span>
+        <span class="handle" onclick="moveUp(${id})">↑</span>
         <span class="badge">${idx+1}</span>
         <span class="name" style="flex:1;">${c.name}<span class="uni">${c.uni}</span></span>
         <span class="rm" onclick="removeFromRank(${id})">✕</span>
@@ -318,18 +318,21 @@ function renderRanked(){
   const note = document.getElementById('rank-count-note');
   if(note) note.textContent = `اخترت ${count} من ${eligibleCount} كلية.`;
   if(sortableInstance){ sortableInstance.destroy(); sortableInstance = null; }
-  if(typeof Sortable !== 'undefined' && list){
-    sortableInstance = new Sortable(list, {
-      handle: '.handle',
-      animation: 150,
-      onEnd(){
-        const newOrder = Array.from(list.children).map(el=>parseInt(el.dataset.id, 10));
-        setRankedIds(newOrder);
-        renderRanked();
-      }
-    });
-  }
+  // Disable drag-and-drop sorting and prefer explicit arrow controls.
+  // If you later want to re-enable drag sorting, remove this block.
 }
+
+// Move an item up (decrease its index) when the up-arrow handle is clicked.
+window.moveUp = function(id){
+  const ids = getRankedIds();
+  const idx = ids.indexOf(id);
+  if(idx <= 0) return; // already first
+  // swap with previous
+  const newIds = ids.slice();
+  const tmp = newIds[idx-1]; newIds[idx-1] = newIds[idx]; newIds[idx] = tmp;
+  setRankedIds(newIds);
+  renderRanked();
+};
 
 async function submitApplication(){
   const draft = getApplicantDraft();
