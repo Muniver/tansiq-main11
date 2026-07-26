@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>الإحصائيات - بوابة تنسيق ابن الجياري</title>
+<title>الدردشة المباشرة - بوابة تنسيق ابن الجيار</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Rakkas&family=Aref+Ruqaa:wght@400;700&family=Cairo:wght@300;400;500;600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 <script src="app.js" defer></script>
 </head>
-<body data-page="stats">
-<div class="ribbon">📜 <b>الهيئة العليا للتنسيق الجياري</b> — بوابة قبول الكليات والمعاهد العليا</div></div>
+<body data-page="chat">
+<div class="ribbon">📜 <b>الهيئة العليا للتنسيق الجياري</b> — بوابة قبول الكليات والمعاهد العليا</div>
 <header class="site">
   <div class="brand">
     <div class="seal-mini">
@@ -31,21 +31,32 @@
   </nav>
 </header>
 <main>
-  <section id="page-stats" class="page">
+  <section id="page-chat" class="page active">
     <div class="section-head">
-      <h2>النتائج والإحصائيات</h2>
-      <p>مين طالب إيه لحد دلوقتي، حسب كل المتقدمين المسجلين على الموقع.</p>
+      <h2>الدردشة المباشرة</h2>
+      <p>تواصل مع زوار الموقع وأحدث الرسائل مباشرة.</p>
     </div>
-    <div class="stat-top">
-      <div class="stat-box"><div class="n" id="stat-total">—</div><div class="l">إجمالي المتقدمين</div></div>
-      <div class="stat-box"><div class="n" id="stat-avg">—</div><div class="l">متوسط المجموع</div></div>
-      <div class="stat-box"><div class="n" id="stat-top-college">—</div><div class="l">الأعلى طلبًا كرغبة أولى</div></div>
+    <div class="chat-page-card">
+      <div class="chat-page-head">
+        <div>
+          <strong>Live Chat</strong>
+          <p>سجل دخولك برقم الجلوس ثم ابدأ المحادثة.</p>
+        </div>
+        <a href="home.html" class="ghost" style="background:rgba(255,255,255,.16); color:#fff; border-color:rgba(255,255,255,.2); text-decoration:none;">العودة للرئيسية</a>
+      </div>
+      <div class="chat-login-bar">
+        <input id="chat-seat-input" class="chat-name" maxlength="20" placeholder="أدخل رقم الجلوس">
+        <button id="chat-login-btn" class="chat-login-btn" type="button">دخول</button>
+      </div>
+      <div id="chat-user-badge" class="chat-user-badge">أنت غير مسجل دخول</div>
+      <div id="chat-pinned-message" class="chat-pinned-message"></div>
+      <div id="chat-page-messages" class="chat-page-messages"></div>
+      <div id="chat-reply-preview" class="chat-reply-preview"></div>
+      <div class="chat-page-form">
+        <input id="chat-page-input" class="chat-input" maxlength="240" placeholder="اكتب رسالتك...">
+        <button id="chat-page-send" class="chat-send" type="button">إرسال</button>
+      </div>
     </div>
-    <div class="tabs">
-      <div class="tab active" id="tab-first">عدد طلاب كل كلية</div>
-      <a href="result.html" class="tab" style="text-decoration:none;display:flex;align-items:center;justify-content:center;">اعرف نتيجتك من هنا</a>
-    </div>
-    <div id="stats-body"><div class="loading">جاري تحميل النتائج من السجلات الرسمية...</div></div>
   </section>
 </main>
 <footer class="site">
@@ -54,15 +65,5 @@
     <span>dev by <a href="https://www.instagram.com/jo_elnasr" target="_blank" rel="noreferrer noopener"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 2C4.238 2 2 4.238 2 7v10c0 2.762 2.238 5 5 5h10c2.762 0 5-2.238 5-5V7c0-2.762-2.238-5-5-5H7zm10 1.5c.828 0 1.5.672 1.5 1.5S17.828 6.5 17 6.5 15.5 5.828 15.5 5 16.172 3.5 17 3.5zM12 7.5c2.481 0 4.5 2.019 4.5 4.5S14.481 16.5 12 16.5 7.5 14.481 7.5 12 9.519 7.5 12 7.5zm0 1.5a3 3 0 100 6 3 3 0 000-6z"/></svg>@jo_elnasr</a></span>
   </div>
 </footer>
-<script>
-  atOptions = {
-    'key' : '3800fe7ab4d15a41b45fb63ee847b402',
-    'format' : 'iframe',
-    'height' : 300,
-    'width' : 160,
-    'params' : {}
-  };
-</script>
-<script src="https://www.highperformanceformat.com/3800fe7ab4d15a41b45fb63ee847b402/invoke.js"></script>
 </body>
 </html>

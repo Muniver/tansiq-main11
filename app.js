@@ -184,6 +184,440 @@ function showPageMessage(message){
   }
 }
 
+const CHAT_REACTION_EMOJIS = ['❤️','🔥','😂'];
+let liveChatMessages = [];
+let liveChatModerators = [];
+let liveChatTimer = null;
+let liveChatUser = null;
+let openReactionPickerId = null;
+let chatReplyTargetId = null;
+
+function getMessageById(messageId){
+  return liveChatMessages.find(msg => msg.id === messageId) || null;
+}
+
+function setReplyTarget(messageId){
+  const message = getMessageById(messageId);
+  if(!message) return;
+  chatReplyTargetId = messageId;
+  renderLiveChatMessages();
+}
+
+function clearReplyTarget(){
+  chatReplyTargetId = null;
+  renderLiveChatMessages();
+}
+
+function getCollegeLabelBySeat(seat){
+  if(!seat) return 'غير محدد';
+  const applicant = JSON.parse(sessionStorage.getItem('liveChatApplicants') || '{}')[seat];
+  if(applicant && applicant.collegeName) return applicant.collegeName;
+  return 'غير محدد';
+}
+
+function normalizeReactions(reactions){
+  if(!reactions || typeof reactions !== 'object') return {};
+  const normalized = {};
+  Object.entries(reactions).forEach(([emoji, users]) => {
+    if(Array.isArray(users)){
+      normalized[emoji] = users.filter(Boolean).map(String);
+    } else if(users && typeof users === 'object'){
+      normalized[emoji] = Object.values(users).filter(Boolean).map(String);
+    } else if(users !== null && users !== undefined){
+      normalized[emoji] = [String(users)];
+    }
+  });
+  return normalized;
+}
+
+function normalizeMessage(msg){
+  if(!msg || typeof msg !== 'object') return null;
+  return {
+    ...msg,
+    reactions: normalizeReactions(msg.reactions),
+    isAdmin: !!msg.isAdmin,
+    isModerator: !!msg.isModerator,
+    pinned: !!msg.pinned,
+    ts: typeof msg.ts === 'number' ? msg.ts : Date.now(),
+  };
+}
+
+function renderLiveChatMessages(){
+  const box = document.getElementById('chat-page-messages');
+  const pinnedContainer = document.getElementById('chat-pinned-message');
+  if(!box || !pinnedContainer) return;
+  if(!liveChatMessages.length){
+    pinnedContainer.innerHTML = '';
+    box.innerHTML = '<div class="chat-empty">ابدأ الدردشة أول رسالة…</div>';
+    return;
+  }
+
+  const renderMessage = (msg) => {
+    const collegeName = msg.collegeName || getCollegeLabelBySeat(msg.seat) || 'غير محدد';
+    const isModerator = isSeatModerator(msg.seat) || msg.isModerator;
+    const adminClass = msg.isAdmin ? ' chat-bubble-admin' : '';
+    const moderatorClass = isModerator && !msg.isAdmin ? ' chat-bubble-moderator' : '';
+    const pinnedClass = msg.pinned ? ' chat-bubble-pinned' : '';
+    const adminBadge = msg.isAdmin ? '<span class="chat-admin-badge">◆ Admin</span>' : '';
+    const moderatorBadge = isModerator && !msg.isAdmin ? '<span class="chat-moderator-badge">Moderator</span>' : '';
+    const pinButton = liveChatUser?.isAdmin
+      ? `<button class="chat-pin-btn" type="button" onclick="togglePinMessage('${msg.id}')">${msg.pinned ? 'فك التثبيت' : 'تثبيت'}</button>`
+      : '';
+    const canDelete = liveChatUser?.isAdmin || (liveChatUser?.isModerator && !msg.isAdmin);
+    const deleteButton = canDelete
+      ? `<button class="chat-delete-btn" type="button" onclick="deleteLiveChatMessage('${msg.id}')">حذف</button>`
+      : '';
+    const modToggleButton = liveChatUser?.isAdmin
+      ? `<button class="chat-moderator-btn" type="button" onclick="toggleModerator('${msg.id}')">${isModerator ? 'إلغاء مود' : 'تعيين مود'}</button>`
+      : '';
+    const isOpen = openReactionPickerId === msg.id;
+    const pickerToggle = `<button class="chat-reaction-toggle" type="button" onclick="toggleReactionPicker('${msg.id}')">😀</button>`;
+    const replyButton = `<button class="chat-reply-btn" type="button" onclick="setReplyTarget('${msg.id}')">رد</button>`;
+    const reactions = normalizeReactions(msg.reactions);
+    const reactionButtons = CHAT_REACTION_EMOJIS.map(emoji => {
+      const reacted = Array.isArray(reactions[emoji]) && reactions[emoji].includes(liveChatUser?.seat);
+      const count = Array.isArray(reactions[emoji]) ? reactions[emoji].length : 0;
+      return `<button class="chat-react-btn${reacted ? ' reacted' : ''}" type="button" onclick="toggleReaction('${msg.id}','${emoji}')">${emoji}${count ? ' ' + count : ''}</button>`;
+    }).join('');
+    const reactionPanel = isOpen ? `<div class="chat-reaction-row">${reactionButtons}</div>` : '';
+    const reactionSummary = CHAT_REACTION_EMOJIS.map(emoji => {
+      const count = Array.isArray(reactions[emoji]) ? reactions[emoji].length : 0;
+      return count ? `<span class="chat-reaction-summary-item">${emoji} ${count}</span>` : '';
+    }).filter(Boolean).join('');
+    const messageDate = new Date(msg.ts || Date.now());
+    const dateLabel = messageDate.toLocaleDateString('ar-EG', { day:'2-digit', month:'2-digit', year:'numeric' });
+    const timeLabel = messageDate.toLocaleTimeString('ar-EG', { hour:'2-digit', minute:'2-digit' });
+    return `
+      <div class="chat-bubble${adminClass}${moderatorClass}${pinnedClass}">
+        <div class="chat-meta">
+          <div>
+            <strong>${(msg.name || 'زائر').replace(/</g, '&lt;').replace(/>/g, '&gt;')} ${adminBadge}${moderatorBadge}</strong>
+            <span class="chat-college">${collegeName.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>
+          </div>
+          <div class="chat-meta-actions">
+            ${msg.pinned ? '<span class="chat-pin-icon">📌</span>' : ''}
+            <div class="chat-meta-time">
+              <span class="chat-time">${timeLabel}</span>
+              <span class="chat-date">${dateLabel}</span>
+            </div>
+            ${pickerToggle}
+            ${replyButton}
+            ${pinButton}
+            ${deleteButton}
+            ${modToggleButton}
+          </div>
+        </div>
+        ${msg.replyTo ? `<div class="chat-message-reply"><strong>رد على ${msg.replyTo.name || 'زائر'}</strong><span>${(msg.replyTo.text || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span></div>` : ''}
+        <div class="chat-message-text">${(msg.text || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+        ${reactionPanel}
+        ${reactionSummary ? `<div class="chat-reaction-summary">${reactionSummary}</div>` : ''}
+      </div>`;
+  };
+
+  const pinnedMessages = liveChatMessages.filter(msg => msg.pinned);
+  const normalMessages = liveChatMessages.filter(msg => !msg.pinned);
+  if(pinnedMessages.length){
+    pinnedContainer.innerHTML = `
+      <div class="chat-pinned-heading">
+        <span class="chat-pinned-label">رسالة مثبتة</span>
+        <span class="chat-pinned-note">ستظل هذه الرسالة مرئية أعلى الدردشة.</span>
+      </div>
+      ${pinnedMessages.map(renderMessage).join('')}`;
+  } else {
+    pinnedContainer.innerHTML = '';
+  }
+
+  const replyPreview = document.getElementById('chat-reply-preview');
+  if(replyPreview){
+    const target = chatReplyTargetId ? getMessageById(chatReplyTargetId) : null;
+    if(target){
+      replyPreview.innerHTML = `
+        <div class="chat-reply-preview-header">
+          <span>رد على <strong>${target.name.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</strong></span>
+          <button class="chat-reply-cancel" type="button" onclick="clearReplyTarget()">إلغاء</button>
+        </div>
+        <div class="chat-reply-preview-body">${(target.text || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
+    } else {
+      replyPreview.innerHTML = '';
+    }
+  }
+
+  box.innerHTML = normalMessages.length
+    ? normalMessages.map(renderMessage).join('')
+    : '<div class="chat-empty">لا توجد رسائل أخرى حالياً.</div>';
+  box.scrollTop = box.scrollHeight;
+}
+
+async function loadLiveChatModerators(){
+  try{
+    const data = await storageGet('chat:moderators');
+    const moderators = Array.isArray(data)
+      ? data
+      : (data && typeof data === 'object' ? Object.values(data) : []);
+    liveChatModerators = moderators.filter(Boolean).map(String);
+  }catch(e){
+    console.error('loadLiveChatModerators failed', e);
+    liveChatModerators = [];
+  }
+}
+
+function isSeatModerator(seat){
+  return seat && liveChatModerators.includes(seat);
+}
+
+async function loadLiveChatMessages(){
+  try{
+    await loadLiveChatModerators();
+    const data = await storageGet('chat:messages');
+    const list = Array.isArray(data)
+      ? data
+      : (data && typeof data === 'object' ? Object.values(data) : []);
+    liveChatMessages = list
+      .map(normalizeMessage)
+      .filter(Boolean)
+      .sort((a,b) => {
+        const pinnedA = a.pinned ? 1 : 0;
+        const pinnedB = b.pinned ? 1 : 0;
+        return pinnedB - pinnedA || (a.ts || 0) - (b.ts || 0);
+      }).slice(-40);
+    renderLiveChatMessages();
+  }catch(e){
+    console.error('loadLiveChatMessages failed', e);
+  }
+}
+
+async function loginLiveChat(){
+  const seatInput = document.getElementById('chat-seat-input');
+  const userBadge = document.getElementById('chat-user-badge');
+  const seat = seatInput?.value.trim();
+  if(!seat) return;
+
+  if(seat === 'jo_elnasr01147'){
+    liveChatUser = {
+      seat,
+      name: 'Admin',
+      collegeName : '👑 jo_elnasr',
+      isAdmin: true
+    };
+    if(userBadge){
+      userBadge.innerHTML = `<span>تم تسجيل الدخول باسم</span> <strong class="admin-badge">Admin</strong> <span>—</span> <strong class="admin-badge">👑 مدير النظام</strong>`;
+    }
+    if(seatInput) seatInput.value = seat;
+    renderLiveChatMessages();
+    return;
+  }
+
+  try{
+    const data = await storageGet('applicant:' + seat);
+    const applicant = typeof data === 'string' ? JSON.parse(data) : data;
+    if(!applicant || !applicant.name){
+      if(userBadge) userBadge.textContent = 'لا يوجد طالب بهذا الرقم';
+      return;
+    }
+
+    const collegeName = applicant.order && applicant.order[0] !== undefined && COLLEGES[applicant.order[0]]
+      ? COLLEGES[applicant.order[0]].name
+      : 'غير محدد';
+
+    const applicantMap = JSON.parse(sessionStorage.getItem('liveChatApplicants') || '{}');
+    applicantMap[seat] = { name: applicant.name, collegeName };
+    sessionStorage.setItem('liveChatApplicants', JSON.stringify(applicantMap));
+
+    const isModerator = isSeatModerator(seat);
+    liveChatUser = { seat, name: applicant.name, collegeName, isAdmin: false, isModerator };
+    if(userBadge){
+      userBadge.innerHTML = `<span>تم تسجيل الدخول باسم</span> <strong>${applicant.name}</strong> <span>— الكلية الأولى:</span> <strong>${collegeName}</strong>`;
+    }
+    if(seatInput) seatInput.value = seat;
+    renderLiveChatMessages();
+  }catch(e){
+    if(userBadge) userBadge.textContent = 'حدث خطأ أثناء تسجيل الدخول';
+  }
+}
+
+async function deleteLiveChatMessage(messageId){
+  if(!(liveChatUser?.isAdmin || liveChatUser?.isModerator)){
+    alert('ليس لديك صلاحية حذف الرسائل.');
+    return;
+  }
+  if(!messageId) return;
+  const message = liveChatMessages.find(msg => msg.id === messageId);
+  if(!message) return;
+  if(message.isAdmin && liveChatUser?.isModerator && !liveChatUser?.isAdmin){
+    alert('لا يمكنك حذف رسالة الأدمن.');
+    return;
+  }
+  if(!confirm('هل أنت متأكد أنك تريد حذف هذه الرسالة؟')) return;
+
+  const next = liveChatMessages.filter(msg => msg.id !== messageId).slice(-40);
+  const normalizedNext = next.map(normalizeMessage);
+  const result = await storageSet('chat:messages', normalizedNext);
+  if(result && result.ok){
+    liveChatMessages = normalizedNext;
+    document.body.classList.add('chat-deleting');
+    setTimeout(() => {
+      document.body.classList.remove('chat-deleting');
+      renderLiveChatMessages();
+    }, 180);
+  }else{
+    alert('تعذر حذف الرسالة، حاول مرة أخرى.');
+  }
+}
+
+async function toggleReaction(messageId, emoji){
+  if(!liveChatUser){
+    alert('سجل دخول أولاً لكي تضع ردة.');
+    return;
+  }
+  const index = liveChatMessages.findIndex(msg => msg.id === messageId);
+  if(index === -1) return;
+
+  const message = { ...liveChatMessages[index] };
+  const reactions = normalizeReactions(message.reactions);
+  const users = new Set(reactions[emoji] || []);
+  if(users.has(liveChatUser.seat)){
+    users.delete(liveChatUser.seat);
+  } else {
+    users.add(liveChatUser.seat);
+  }
+  if(users.size){
+    reactions[emoji] = Array.from(users);
+  } else {
+    delete reactions[emoji];
+  }
+  message.reactions = reactions;
+  const next = liveChatMessages.slice();
+  next[index] = normalizeMessage(message);
+  const normalizedNext = next.slice(-40).map(normalizeMessage);
+  const result = await storageSet('chat:messages', normalizedNext);
+  if(result && result.ok){
+    liveChatMessages = normalizedNext;
+    renderLiveChatMessages();
+  } else {
+    alert('تعذر تحديث التفاعل، حاول مرة أخرى.');
+  }
+}
+
+async function togglePinMessage(messageId){
+  if(!liveChatUser?.isAdmin){
+    alert('ليس لديك صلاحية تثبيت الرسائل.');
+    return;
+  }
+  const index = liveChatMessages.findIndex(msg => msg.id === messageId);
+  if(index === -1) return;
+
+  const message = normalizeMessage({ ...liveChatMessages[index], pinned: !liveChatMessages[index].pinned });
+  const next = liveChatMessages.slice();
+  next[index] = message;
+  const normalizedNext = next.slice(-40).map(normalizeMessage);
+  const result = await storageSet('chat:messages', normalizedNext);
+  if(result && result.ok){
+    liveChatMessages = normalizedNext;
+    renderLiveChatMessages();
+  } else {
+    alert('تعذر تحديث حالية التثبيت، حاول مرة أخرى.');
+  }
+}
+
+async function toggleModerator(messageId){
+  if(!liveChatUser?.isAdmin){
+    alert('ليس لديك صلاحية تعيين الموديراتور.');
+    return;
+  }
+  const index = liveChatMessages.findIndex(msg => msg.id === messageId);
+  if(index === -1) return;
+  const seat = liveChatMessages[index].seat;
+  const nextModerators = liveChatModerators.slice();
+  const isMod = isSeatModerator(seat);
+
+  if(isMod){
+    liveChatModerators = nextModerators.filter(s => s !== seat);
+  } else {
+    liveChatModerators = [...new Set([...nextModerators, seat])];
+  }
+
+  const result = await storageSet('chat:moderators', liveChatModerators);
+  if(result && result.ok){
+    if(liveChatUser?.seat === seat){
+      liveChatUser.isModerator = !isMod;
+    }
+    renderLiveChatMessages();
+  } else {
+    alert('تعذر تحديث صلاحية الموديراتور، حاول مرة أخرى.');
+  }
+}
+
+function toggleReactionPicker(messageId){
+  openReactionPickerId = openReactionPickerId === messageId ? null : messageId;
+  renderLiveChatMessages();
+}
+
+async function sendLiveChatMessage(){
+  const input = document.getElementById('chat-page-input');
+  if(!input) return;
+
+  if(!liveChatUser){
+    alert('برجاء تسجيل الدخول برقم الجلوس أولًا.');
+    return;
+  }
+
+  const text = input.value.trim();
+  if(!text) return;
+
+  const replyTo = chatReplyTargetId ? (() => {
+    const target = getMessageById(chatReplyTargetId);
+    return target ? { id: target.id, name: target.name, text: target.text } : null;
+  })() : null;
+  const message = {
+    id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    name: liveChatUser.name,
+    seat: liveChatUser.seat,
+    collegeName: liveChatUser.collegeName,
+    isAdmin: liveChatUser.isAdmin || false,
+    isModerator: liveChatUser.isModerator || false,
+    text,
+    ts: Date.now(),
+    reactions: {},
+    pinned: false,
+    replyTo
+  };
+  const next = [...liveChatMessages, message].slice(-40);
+  const normalizedNext = next.map(normalizeMessage);
+  const result = await storageSet('chat:messages', normalizedNext);
+  if(result.ok){
+    liveChatMessages = normalizedNext;
+    input.value = '';
+    chatReplyTargetId = null;
+    renderLiveChatMessages();
+  }else{
+    alert('تعذر إرسال الرسالة، جرّب مرة أخرى.');
+  }
+}
+
+function initChatPage(){
+  setActiveNav('chat');
+  const input = document.getElementById('chat-page-input');
+  const seatInput = document.getElementById('chat-seat-input');
+  const loginBtn = document.getElementById('chat-login-btn');
+  const sendBtn = document.getElementById('chat-page-send');
+
+  input?.addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter'){
+      e.preventDefault();
+      sendLiveChatMessage();
+    }
+  });
+  seatInput?.addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter'){
+      e.preventDefault();
+      loginLiveChat();
+    }
+  });
+  loginBtn?.addEventListener('click', loginLiveChat);
+  sendBtn?.addEventListener('click', sendLiveChatMessage);
+  loadLiveChatMessages();
+}
+
 function initRegisterPage(){
   setActiveNav('register');
   const draft = getApplicantDraft();
@@ -543,6 +977,7 @@ function initPage(){
     case 'colleges': initDirectoryPage(); break;
     case 'stats': initStatsPage(); break;
     case 'admin': initAdminPage(); break;
+    case 'chat': initChatPage(); break;
     default: break;
   }
 }
