@@ -320,7 +320,6 @@ function renderLiveChatMessages(){
     pinnedContainer.innerHTML = `
       <div class="chat-pinned-heading">
         <span class="chat-pinned-label">رسالة مثبتة</span>
-        <span class="chat-pinned-note">ستظل هذه الرسالة مرئية أعلى الدردشة.</span>
       </div>
       ${pinnedMessages.map(renderMessage).join('')}`;
   } else {

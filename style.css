@@ -441,10 +441,6 @@ main{position:relative; z-index:2; max-width:1080px; margin:0 auto; padding:34px
   font-weight:800;
   font-size:.9rem;
 }
-#chat-pinned-message .chat-pinned-note{
-  color:var(--ink-soft);
-  font-size:.82rem;
-}
 .chat-pin-icon{
   display:flex; align-items:center; justify-content:center; width:34px; height:34px; font-size:1.2rem; margin-right:10px; background:rgba(255,255,255,.95); border-radius:50%; box-shadow:0 4px 10px rgba(0,0,0,.08);
 }
