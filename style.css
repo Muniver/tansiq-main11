@@ -628,12 +628,32 @@ button.ghost:hover{background:rgba(124,31,43,0.04); border-color:rgba(124,31,43,
 .receipt .home-btn{margin-top:20px;}
 
 /* ---- COLLEGES DIRECTORY ---- */
+.college-directory-shell{display:grid; grid-template-columns:1.2fr 0.8fr; gap:18px; align-items:start;}
+.college-directory-panel, .college-details-panel{background:var(--paper-dark); border:1px solid var(--paper-line); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow);} 
+.college-details-panel{min-height:280px; position:sticky; top:18px;}
 .dir-search{max-width:420px; margin:0 auto 24px; display:block; padding:11px 14px; border:1px solid var(--paper-line); border-radius:20px; background:#fbf6e8; font-family:'Cairo',sans-serif;}
-.dir-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:14px;}
-.dir-card{background:var(--paper-dark); border:1px solid var(--paper-line); border-radius:var(--radius); padding:14px 16px; box-shadow:var(--shadow);}
-.dir-card .num{font-size:.7rem; color:var(--gold); font-weight:800;}
-.dir-card .name{font-family:var(--display); font-weight:400; font-size:1.2rem; color:var(--maroon-deep); margin:3px 0 4px;}
-.dir-card .uni{font-size:.78rem; color:var(--ink-soft);}
+.dir-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:12px; margin-top:10px;}
+.dir-card{width:100%; text-align:right; background:#fbf6e8; border:1px solid var(--paper-line); border-radius:var(--radius); padding:12px 13px; box-shadow:0 8px 20px rgba(20,32,51,.06); cursor:pointer; transition:transform .16s, box-shadow .16s, border-color .16s;}
+.dir-card:hover, .dir-card.active{transform:translateY(-2px); border-color:var(--gold); box-shadow:0 12px 24px rgba(20,32,51,.1); background:#f4e9c9;}
+.dir-card .dir-card-badge{font-size:.68rem; color:var(--gold); font-weight:800; margin-bottom:6px;}
+.dir-card .dir-card-name{font-family:var(--display); font-weight:400; font-size:1.08rem; color:var(--maroon-deep); margin-bottom:4px; line-height:1.45;}
+.dir-card .dir-card-uni{font-size:.76rem; color:var(--ink-soft); margin-bottom:6px;}
+.dir-card .dir-card-mini{font-size:.74rem; color:var(--green); font-weight:700;}
+.college-empty-state{color:var(--ink-soft); font-size:.92rem; line-height:1.8; padding:12px 0;}
+.college-detail-head{display:flex; align-items:center; gap:12px; margin-bottom:12px;}
+.college-logo{width:84px; height:84px; object-fit:cover; border-radius:50%; border:1px solid var(--paper-line); background:#fff; padding:6px; box-shadow:0 6px 18px rgba(20,32,51,.06); flex:none;}
+.college-detail-name{font-family:var(--display); font-weight:400; font-size:1.2rem; color:var(--maroon-deep); margin-bottom:2px;}
+.college-detail-uni{font-size:.86rem; color:var(--ink-soft);}
+.college-detail-grid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-top:10px;}
+.info-pill{background:#fbf6e8; border:1px dashed var(--paper-line); border-radius:10px; padding:10px;}
+.info-pill .label{display:block; font-size:.72rem; color:var(--ink-soft); margin-bottom:4px;}
+.info-pill .value{font-size:1rem; font-weight:800; color:var(--maroon-deep);}
+.college-detail-note{margin-top:14px; color:var(--ink-soft); font-size:.84rem; line-height:1.8;}
+.college-detail-footer{margin-top:16px; text-align:center; padding-top:12px; border-top:1px solid var(--paper-line);}
+.college-apply-text{color:var(--ink); font-weight:700; font-size:.95rem;}
+.college-link-text{color:var(--maroon); text-decoration:none; font-weight:700; font-size:.95rem;}
+.college-link-text:hover{text-decoration:underline;}
+@media(max-width:860px){.college-directory-shell{grid-template-columns:1fr;}.college-details-panel{position:static;}}
 
 /* ---- STATS ---- */
 .stat-top{display:flex; gap:16px; flex-wrap:wrap; margin-bottom:26px;}

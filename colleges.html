@@ -8,30 +8,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Rakkas&family=Aref+Ruqaa:wght@400;700&family=Cairo:wght@300;400;500;600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 <script src="app.js" defer></script>
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const page = document.body?.dataset?.page || 'colleges';
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    const target = document.getElementById('page-' + page);
-    if (target) target.classList.add('active');
-    const grid = document.getElementById('dir-grid');
-    const input = document.getElementById('dir-search');
-    if (grid && window.COLLEGES && window.COLLEGES.length) {
-      const render = () => {
-        const filter = (input?.value || '').trim();
-        const items = window.COLLEGES.filter(c => !filter || c.name.includes(filter) || c.uni.includes(filter));
-        grid.innerHTML = items.map(c => `
-          <div class="dir-card">
-            <div class="num">#${c.id + 1}</div>
-            <div class="name">${c.name}</div>
-            <div class="uni">${c.uni}${c.minScore != null ? ` • الحد الأدنى: ${c.minScore}` : ''}</div>
-          </div>`).join('') || '<div class="loading">مفيش نتائج مطابقة.</div>';
-      };
-      input?.addEventListener('input', render);
-      render();
-    }
-  });
-</script>
 </head>
 <body data-page="colleges">
 <div class="ribbon">📜 <b>الهيئة العليا للتنسيق الجياري</b> — بوابة قبول الكليات والمعاهد العليا</div></div>
@@ -56,31 +32,18 @@
 </header>
 <main>
   <section id="page-colleges" class="page">
-    <div class="steps">
-      <div class="step-pill done"><span class="dot">✓</span> بياناتك</div>
-      <div class="step-pill current"><span class="dot">٢</span> اختيار الكليات</div>
-      <div class="step-pill"><span class="dot">٣</span> التأكيد</div>
-    </div>
     <div class="section-head">
-      <h2>الخطوة الثانية: اختر رغباتك</h2>
-      <p>ابحث عن الكلية ثم اضغط عليها لإضافتها إلى ترتيبك. الدرجات غير ظاهرة هنا.</p>
+      <h2>الكليات المتاحة</h2>
+      <p>ابحث عن الكلية ثم اضغط عليها لعرض الحد الأدنى للمجموع والنسبة المئوية.</p>
     </div>
-    <div class="rank-wrap">
-      <div class="panel">
-        <h4>الكليات المتاحة</h4>
-        <input class="search-box" id="avail-search" placeholder="ابحث باسم الكلية أو الجامعة...">
-        <div class="list-scroll" id="avail-list"></div>
+    <div class="college-directory-shell">
+      <div class="college-directory-panel">
+        <input class="search-box" id="dir-search" placeholder="ابحث باسم الكلية أو الجامعة...">
+        <div class="dir-grid" id="dir-grid"></div>
       </div>
-      <div class="panel">
-        <h4>ترتيب رغباتك <span style="font-size:.75rem;color:var(--ink-soft);font-weight:400;">(اسحب لتغيير الترتيب)</span></h4>
-        <div class="list-scroll" id="rank-list"></div>
-        <div id="rank-empty" class="empty-note">لسه ماخترتش أي كلية. اضغط على أي كلية من القائمة اليمنى لإضافتها هنا.</div>
+      <div class="college-details-panel" id="college-details-panel">
+        <div class="college-empty-state">اختر كلية من القائمة لعرض تفاصيلها هنا.</div>
       </div>
-    </div>
-    <div class="submit-bar">
-      <button class="ghost" type="button" onclick="location.href='register.html'">⟶ رجوع للبيانات</button>
-      <span class="count-note" id="rank-count-note">اخترت 0 من 89 كلية.</span>
-      <button class="primary" id="submit-btn" type="button" onclick="submitApplication()">📮 تقديم الرغبات</button>
     </div>
   </section>
 </main>

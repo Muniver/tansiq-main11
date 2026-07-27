@@ -1,6 +1,6 @@
 const COLLEGES = [
   { name: "كلية الحب والجواز", university: "جامعة القاهرة", minScore: 300 },
-  { name: "كلية نظام الطيبات", university: "جامعة ضياء العوضي", minScore: 160 },
+  { name: "كلية نظام الطيبات", university: "جامعة ضياء العوضي", minScore: 297 },
   { name: "كلية إدارة المصالح الحكومية", university: "جامعة الزقازيق", minScore: 294 },
   { name: "كلية حلب الأبقار", university: "جامعة الزقازيق الأهلية", minScore: 291 },
   { name: "كلية هندسة جر الكنبة من الصالة", university: "جامعة القاهرة", minScore: 288 },
@@ -84,6 +84,7 @@ const COLLEGES = [
   { name: "معهد تركيب نجف", university: "جنوب السودان", minScore: 60 },
   { name: "معهد تكنولوجيا قفل السوستة", university: "جامعة البدرشين", minScore: 57 }
 ].map((c, i) => ({ id: i, name: c.name, uni: c.university, minScore: c.minScore }));
+window.COLLEGES = COLLEGES;
 
 const ADMIN_PASSWORD = "jolipa12";
 
@@ -810,30 +811,81 @@ function initConfirmPage(){
   }); }
 }
 
-function initDirectoryPage(){
-  setActiveNav('colleges');
-  const draft = getApplicantDraft();
-  if(!draft){ window.location.href = 'register.html'; return; }
+let selectedCollegeId = null;
 
-  const input = document.getElementById('avail-search');
-  if(input){ input.addEventListener('input', renderAvailable); }
-  const submit = document.getElementById('submit-btn');
-  if(submit){ submit.addEventListener('click', submitApplication); }
-  renderAvailable();
-  renderRanked();
+function getCollegePercentage(college){
+  if(college?.minScore == null) return '—';
+  return `${((college.minScore / 320) * 100).toFixed(1)}%`;
 }
 
-function renderDirectory(){
-  const filter = (document.getElementById('dir-search')?.value||'').trim();
+function getCollegeLogo(college){
+  const id = Number(college?.id ?? 0);
+  const imageNumber = Math.max(1, Math.min(84, id + 1));
+  return `photos/${imageNumber}.png`;
+}
+
+window.showCollegeDetails = function(id){
+  selectedCollegeId = id;
+  const panel = document.getElementById('college-details-panel');
+  if(!panel) return;
+  const college = COLLEGES[id];
+  if(!college){
+    panel.innerHTML = '<div class="college-empty-state">لم يتم العثور على هذه الكلية.</div>';
+    return;
+  }
+  panel.innerHTML = `
+    <div class="college-detail-head">
+      <img class="college-logo" src="${getCollegeLogo(college)}" alt="${college.name}">
+      <div>
+        <div class="college-detail-name">${college.name}</div>
+        <div class="college-detail-uni">${college.uni}</div>
+      </div>
+    </div>
+    <div class="college-detail-grid">
+      <div class="info-pill">
+        <span class="label">الحد الأدنى للمجموع</span>
+        <span class="value">${college.minScore != null ? college.minScore : '—'}</span>
+      </div>
+      <div class="info-pill">
+        <span class="label">النسبة المئوية</span>
+        <span class="value">${getCollegePercentage(college)}</span>
+      </div>
+    </div>
+    <div class="college-detail-footer">
+      <span class="college-apply-text">للتقديم </span>
+      <a href="https://nategathanwya.site" target="_blank" rel="noreferrer noopener" class="college-link-text">nategathanwya.site</a>
+    </div>
+  `;
+};
+
+function initDirectoryPage(){
+  setActiveNav('colleges');
+  const input = document.getElementById('dir-search');
+  if(input){ input.addEventListener('input', renderCollegeDirectory); }
+  renderCollegeDirectory();
+}
+
+function renderCollegeDirectory(){
+  const filter = (document.getElementById('dir-search')?.value || '').trim();
   const grid = document.getElementById('dir-grid');
+  const panel = document.getElementById('college-details-panel');
   if(!grid) return;
-  const items = COLLEGES.filter(c=>!filter || c.name.includes(filter) || c.uni.includes(filter));
-  grid.innerHTML = items.map(c=>`
-    <div class="dir-card">
-      <div class="num">#${c.id+1}</div>
-      <div class="name">${c.name}</div>
-      <div class="uni">${c.uni}</div>
-    </div>`).join('') || '<div class="loading">مفيش نتائج مطابقة.</div>';
+  const items = COLLEGES.filter(c => !filter || c.name.includes(filter) || c.uni.includes(filter));
+  if(!items.length){
+    grid.innerHTML = '<div class="loading">مفيش نتائج مطابقة.</div>';
+    if(panel){ panel.innerHTML = '<div class="college-empty-state">لا توجد كلية مطابقة للبحث الحالي.</div>'; }
+    return;
+  }
+  const selectedStillVisible = items.some(c => c.id === selectedCollegeId);
+  const activeId = selectedStillVisible ? selectedCollegeId : items[0].id;
+  grid.innerHTML = items.map(c => `
+    <button class="dir-card${c.id === activeId ? ' active' : ''}" type="button" onclick="showCollegeDetails(${c.id})">
+      <div class="dir-card-badge">#${c.id + 1}</div>
+      <div class="dir-card-name">${c.name}</div>
+      <div class="dir-card-uni">${c.uni}</div>
+      <div class="dir-card-mini">الحد الأدنى: ${c.minScore != null ? c.minScore : '—'} • ${getCollegePercentage(c)}</div>
+    </button>`).join('');
+  window.showCollegeDetails(activeId);
 }
 
 let statsCache = null;
